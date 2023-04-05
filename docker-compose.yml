@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+  daml-postgres:
+    image: "postgres:13.8"
+    volumes:
+      - "$PWD/canton-tutorial/data:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_USER=test-user
+      - POSTGRES_PASSWORD=test-password
+      - POSTGRES_DB=participant1
+    ports:
+      - "5432:5432"
+    shm_size: "256mb"
+  canton:
+    image: "digitalasset/canton-open-source:2.5.0"
+    volumes:
+      - "$PWD/canton-tutorial:/canton/canton-tutorial"
+    command: -c /canton/canton-tutorial/postgres-persisted/postgres-persisted.conf --bootstrap /canton/canton-tutorial/postgres-persisted/participant-init.canton
+    environment:
+      - POSTGRES_HOST=daml-postgres
+      - POSTGRES_USER=test-user
+      - POSTGRES_PASSWORD=test-password
+    depends_on:
+      - "daml-postgres"
